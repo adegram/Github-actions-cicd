@@ -1,8 +1,7 @@
 name: Node.js CI/CD
-#This pipeline is designed to build, test, and deploy a Node.js application to AWS EKS 
-#using credentials stored in Github Secrets for authentication.
+
 on:
-    paths: ["cicd-node-app/**", ".github/workflows/cicd_credentials_pipeline.yml"]
+    path: ["scheduler-app/**", ".github/workflows/cicd_aws_oidc_scheduler_app_pipeline.yml"]
   push:
     branches:
       - main
@@ -15,7 +14,7 @@ jobs:
       # Set the working directory globally for all 'run' steps in this job
     defaults:
       run:
-        working-directory: ./app
+        working-directory: .
 
     steps:
       - name: Checkout code
@@ -28,7 +27,7 @@ jobs:
       - run: npm install
       - run: npm run build --if-present
       
-      - name: Upload artifacts #Upload build/test artifacts for future jobs
+      - name: Upload artifacts #options to upload build/test artifacts for later jobs
         uses: actions/upload-artifact@v7
         with:
           name: node-app-artifacts
@@ -62,30 +61,15 @@ jobs:
   deploy-AWS-eks:
     runs-on: ubuntu-latest
     needs: docker-build-push
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Configure AWS credentials
+      - name: Assume AWS Role
         uses: aws-actions/configure-aws-credentials@v6.1.0
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
-
-      - name: Setup kubectl
-        uses: azure/setup-kubectl@v4
-
-      - name: Authenticate to EKS cluster (update kubeconfig)
+          role-to-assume: <Role ARN you created in step 2>
+          aws-region: <AWS Region you want to use>
+          role-session-name: MySessionName
+      - name: Additional steps
         run: |
-          aws eks update-kubeconfig --region us-east-1 --name e-node-app-prod-us-east 
+          # Your commands that require AWS credentials
+          aws sts get-caller-identity
 
-      - name: Verify kubectl access
-        run: kubectl get nodes
-
-      - name: Deploy to EKS  
-        run: kubectl apply -f scheduler-deployment.yaml
-
-      - name: Verify deployment  
-        run: kubectl get deployments
