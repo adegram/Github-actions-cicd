@@ -1,6 +1,7 @@
 name: Node.js CI/CD
 
 on:
+    paths: ["cicd-node-pp/**", ".github/workflows/cicd_node_pipeline.yml"]
   push:
     branches:
       - main
