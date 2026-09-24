@@ -1,0 +1,63 @@
+name: Docker build, scan and publish
+on:
+  pull_request:
+    paths: ["docker-build-push/**", ".github/workflows/docker-build-push.yml"]
+  push:
+    branches: [main]
+    paths: ["docker-build-push/**", ".github/workflows/docker-build-push.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: docker-ghcr-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: ./docker-build-push
+          push: false
+          load: true
+          tags: portfolio-demo:${{ github.sha }}
+      - uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: portfolio-demo:${{ github.sha }}
+          format: table
+          exit-code: "1"
+          ignore-unfixed: true
+          vuln-type: os,library
+          severity: HIGH,CRITICAL
+  publish:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/metadata-action@v5
+        id: meta
+        with:
+          images: ghcr.io/${{ github.repository }}/docker-demo
+          tags: |
+            type=sha,format=long
+            type=raw,value=latest,enable={{is_default_branch}}
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: ./docker-build-push
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          sbom: true
+          provenance: mode=max

@@ -1,0 +1,14 @@
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.auto.tfvars
+**/terraform.tfvars
+!**/terraform.tfvars.example
+.terraform/
+.DS_Store
