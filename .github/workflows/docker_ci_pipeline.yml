@@ -1,4 +1,4 @@
-name: microservices CI
+name: microservices CI/CD
 # This pipeline is designed to build, test, and deploy multiple microservices in a Node.js application.
 #  Each microservice is located in its own directory under the 'services' folder. 
 # The pipeline will run tests for each microservice and build Docker images for them, which will be pushed to DockerHub.

@@ -18,9 +18,6 @@ The projects cover different areas of GitHub Actions and CI/CD automation, inclu
 - Docker registry integration
 - Code quality checks
 - Kubernetes deployments
-- Terraform automation
-- Terraform plan and apply workflows
-- GitOps workflows
 
 Projects may vary in scope and are organized separately based on the CI/CD workflow being demonstrated.
 
@@ -32,9 +29,8 @@ Projects may vary in scope and are organized separately based on the CI/CD workf
 - Docker Hub
 - Node.js
 - npm
-- Terraform
+- Trivy
 - Kubernetes
-- Helm
 - AWS
 
 Additional tools may be used where they are relevant to individual workflows.
