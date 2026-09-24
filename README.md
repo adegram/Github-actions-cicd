@@ -1,6 +1,3 @@
-
-# Github-actions-cicd/README.md
-
 # GitHub Actions CI/CD
 
 A collection of GitHub Actions workflows built to automate different parts of the software development and delivery process.
